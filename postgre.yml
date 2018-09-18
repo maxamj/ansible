@@ -1,0 +1,5 @@
+---
+    - hosts: myhost
+      tasks:
+    - name: New file
+      command: rm /etc/ansible/111.ttt
