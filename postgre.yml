@@ -1,5 +1,23 @@
 ---
 - hosts: postgre
+  remote_user: root
+  become: yes
+    
   tasks:
-  - name: Starting httpd
-    service: name=httpd state=started
+  - name: install repo for PostgreSQL 9.6
+    yum:
+    name: https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+    state: present
+            
+  - name: install PostgreSQL version 9.6
+    yum:
+    name: "{{ item }}"
+    state: latest
+    with_items:
+        - postgresql96-server
+	- postgresql96-contrib
+        - pg_repack96
+                                                                                        
+  - name: enable init for 9.6
+    shell: chkconfig --level 2345 postgresql-9.6 on
+                                                                                                            
