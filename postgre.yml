@@ -14,10 +14,26 @@
     name: "{{ item }}"
     state: latest
     with_items:
-        - postgresql96-server
-	- postgresql96-contrib
-        - pg_repack96
-                                                                                        
+    - postgresql96-server
+    - postgresql96-contrib
+    - pg_repack96
+                                                                                
   - name: enable init for 9.6
     shell: chkconfig --level 2345 postgresql-9.6 on
+
+- hosts: postgre
+  remote_user: root
+  become: yes
+    
+  tasks:
+  - service:
+    name: postgresql-9.6
+    state: stopped
+      
+  - file:
+    path: /var/lib/pgsql/9.6/data/
+    state: absent
+                                      
+  - name: create data cluster
+    command: service postgresql-9.6 initdb
                                                                                                             
