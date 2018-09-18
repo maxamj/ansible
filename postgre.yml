@@ -1,5 +1,5 @@
 ---
-    - hosts: myhost
-      tasks:
-    - name: New file
-      command: rm /etc/ansible/111.ttt
+- hosts: postgre
+  tasks:
+  - name: Starting httpd
+    service: name=httpd state=started

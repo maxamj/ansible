@@ -1,2 +1,2 @@
 ##[server]
-51.75.30.78
+postgre ansible_ssh_host=51.75.30.78
