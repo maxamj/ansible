@@ -40,21 +40,40 @@
        name: 'postgresql-9.6'
        state: started
 
-  - name: Create db PostgreSQL
+  - name: Create db1 PostgreSQL
     become: yes
     become_user: postgres
     postgresql_db: 
       name: pgmax1
       encoding: UTF-8
       state: present
+
+  - name: Create db2 PostgreSQL
+    become: yes
+    become_user: postgres
+    postgresql_db: 
+      name: pgmax2
+      encoding: UTF-8
+      state: present
                                               
-  - name: Create user PostgreSQL
+  - name: Create user1 PostgreSQL
     become: yes
     become_user: postgres
     postgresql_user:
       name: upg1
       password: 078385
       db: pgmax1
+      priv: ALL
+      state: present
+      encrypted: no
+  
+  - name: Create user2 PostgreSQL
+    become: yes
+    become_user: postgres
+    postgresql_user:
+      name: upg2
+      password: 078385
+      db: pgmax2
       priv: ALL
       state: present
       encrypted: no
