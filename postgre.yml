@@ -4,6 +4,7 @@
   tasks:
   - name: Install PostgreSQL repo
     yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present    
+  
   - name: Install PostgreSQL
     yum: name="{{ item }}" state=latest
     update_cache: yes
@@ -19,33 +20,26 @@
       - cronie
       - crontabs   
                                   
-- hosts: postgre
-    
-  tasks:
-  - service:
-    name: postgresql-9.6
-    state: stopped
+  - name: PostgreSQL service stop    
+    service:
+       name: 'postgresql-9.6'
+       state: stopped
       
-  - name: create data cluster
+  - name: Create data cluster
     command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
 
-- hosts: postgre
-    
-  tasks:
-  - name: enable postgresql
+  - name: Enable PostgreSQL
     service: 
        name: 'postgresql-9.6'
        enabled: yes
        state: started
        daemon_reload: yes
   
-#  - service:
-#    name: postgresql-9.6
-#    state: started
+  - name: PostgreSQL service start    
+    service:
+       name: 'postgresql-9.6'
+       state: started
 
-- hosts: postgre
-
-  tasks:
   - name: Create db PostgreSQL
     become: yes
     become_user: postgres
@@ -59,7 +53,7 @@
     become_user: postgres
     postgresql_user:
       name: upg1
-      password: "{{ pg_pass }}"
+      password: 078385
       db: pgmax1
       priv: ALL
       state: present
