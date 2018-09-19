@@ -27,7 +27,47 @@
     state: stopped
       
   - name: create data cluster
-#    command: service postgresql-9.6 initdb
     command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
+
+- hosts: postgre
     
-                                                                                                                
+  tasks:
+  - service:
+    name: postgresql-9.6
+    state: started
+
+- hosts: postgre
+
+  tasks:
+#  - name: Ensure application database is created
+#    postgresql_db:  name={{ postgres_app_db }}
+#    encoding: UTF-8
+#    lc_collate: en_US.UTF-8
+#    lc_ctype: en_US.UTF-8
+#    state: present
+#    login_host: postgre
+#    login_user: root
+#    login_password: "{{ postgres_superuser_password }}"
+#    port: "{{ postgres_client_port }}"
+
+#  - name: Create database
+#    postgresql_db: name=maxa1 port=6666
+#    become: true
+#    become_user: root
+ 
+  - name: Create a PostgreSQL DB server
+    hosts: postgre
+    sudo: yes
+    sudo_user: root
+    remote_user: maxpg1
+    vars_files: /etc/ansible/vars/main.yml
+    
+    roles:
+       - createdb
+
+  - name: Create postgres user
+    postgresql_user:
+       db: "maxa1"
+       name: "maxa1"
+       password: "maxa"
+       priv: CONNECT/ALL:SELECT,INSERT,UPDATE,DELETE                                                                                                                   
