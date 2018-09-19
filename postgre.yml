@@ -63,9 +63,15 @@
       name: upg1
       password: 078385
       db: pgmax1
-      priv: ALL
-      state: present
-      encrypted: no
+  
+  - name: Ensure we have access from the new user
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+      db: pgmax1
+      role: upg1
+      objs: ALL_IN_SCHEMA
+      privs: "ALL"
   
   - name: Create user2 PostgreSQL
     become: yes
@@ -74,6 +80,12 @@
       name: upg2
       password: 078385
       db: pgmax2
-      priv: ALL
-      state: present
-      encrypted: no
+
+  - name: Ensure we have access from the new user
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+      db: pgmax2
+      role: superuser
+      objs: ALL_IN_SCHEMA
+      privs: "ALL"
