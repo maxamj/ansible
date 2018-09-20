@@ -85,10 +85,18 @@
 #    become: yes
 #    become_user: postgres
 #    postgresql_privs:
-#       db: dbgr2
+#       db: "{{db_name_2}}"
 #       grant_option: yes
 #       roles: "{{db_user2}}"
 #       objs: ALL_IN_SCHEMA
 #       privs: ALL
 #       type: table
 #       state: present
+
+  - name: Add entry pg_hba.conf
+    lineinfile:
+       dest=/usr/pgsql-9.6/share/pg_hba.conf
+       regexp='local dbgr1 {{db_user1}} 127.0.0.1/32 md5'
+       line='local dbgr1 {{db_user1}} 127.0.0.1/32 md5' state=present
+ #   notify:
+ #    - reload postgres
