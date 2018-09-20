@@ -102,8 +102,8 @@
   - name: Add entry pg_hba.conf user2
     lineinfile:
        dest=/usr/pgsql-9.6/share/pg_hba.conf
-       regexp='local dbgr2 {{db_user2}} 127.0.0.1/32 md5'
-       line='local dbgr2 {{db_user2}} 127.0.0.1/32 md5' state=present
+       regexp='local dbgr2 {{db_user2}} md5'
+       line='local dbgr2 {{db_user2}} ' state=present
     notify:
       - reload postgres
  
