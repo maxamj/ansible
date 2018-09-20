@@ -118,7 +118,8 @@
  
   - name: add entry to postgresql
     lineinfile:
-       dest=/usr/pgsql-9.6/share/postgresql.conf
+#       dest=/usr/pgsql-9.6/share/postgresql.conf
+       dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^listen_addresses'
        line="listen_addresses = '51.75.30.78'"
        regexp='^port'
