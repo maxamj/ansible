@@ -2,12 +2,16 @@
 - hosts: postgre
 
   tasks:
+  
+  # Импортируем константы
   - name: Import vars
     include_vars: vars/vaulted_vars.yml
-  
+	
+  # Устанавливаем необходимый репозиторий для установки
   - name: Install PostgreSQL repo
-    yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present    
-  
+    yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present 
+	
+  # Установка PostgreSQL и включение в автозагрузку  
   - name: Install PostgreSQL
     yum: name="{{ item }}" state=latest
     update_cache: yes
@@ -24,22 +28,25 @@
       - crontabs   
     notify:
       - enable postgres
-                                  
+                                 
+  # Остановка службы PostgreSQL								 
   - name: PostgreSQL service stop    
     service:
        name: 'postgresql-9.6'
        state: stopped
       
+  # Инициализируем наш PostgreSQL	
   - name: Create data cluster
     command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
 
-  - name: Enable PostgreSQL
-    service: 
-       name: 'postgresql-9.6'
-       enabled: yes
-       state: started
-       daemon_reload: yes
-  
+#  - name: Enable PostgreSQL
+#    service: 
+#       name: 'postgresql-9.6'
+#       enabled: yes
+#       state: started
+#       daemon_reload: yes
+
+  # Запускаем службы PostgreSQL	  
   - name: PostgreSQL service start    
     service:
        name: 'postgresql-9.6'
