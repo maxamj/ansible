@@ -85,7 +85,7 @@
 #    become: yes
 #    become_user: postgres
 #    postgresql_privs:
-#       db: "{{db_name_2}}"
+#       db: dbgr2
 #       grant_option: yes
 #       roles: "{{db_user2}}"
 #       objs: ALL_IN_SCHEMA
@@ -93,10 +93,22 @@
 #       type: table
 #       state: present
 
-  - name: Add entry pg_hba.conf
+  - name: Add entry pg_hba.conf user1
     lineinfile:
        dest=/usr/pgsql-9.6/share/pg_hba.conf
        regexp='local dbgr1 {{db_user1}} 127.0.0.1/32 md5'
        line='local dbgr1 {{db_user1}} 127.0.0.1/32 md5' state=present
+	   
+  - name: Add entry pg_hba.conf user2
+    lineinfile:
+       dest=/usr/pgsql-9.6/share/pg_hba.conf
+       regexp='local dbgr2 {{db_user2}} 127.0.0.1/32 md5'
+       line='local dbgr2 {{db_user2}} 127.0.0.1/32 md5' state=present
+ 
+  - name: PostgreSQL service restart after change pg_hda.conf   
+    service:
+       name: 'postgresql-9.6'
+       state: restart
+ 
  #   notify:
  #    - reload postgres
