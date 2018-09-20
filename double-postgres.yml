@@ -1,0 +1,13 @@
+---
+- hosts: postgre
+
+  tasks:
+  
+  - name: Run the command if the specified file does not exist.
+    command: ln -s /usr/pgsql-9.6/bin/postgresql /etc/init.d/postgresql-db2
+ 
+  - name: Run the command if the specified file does not exist.
+    command: "{{ item }}"
+    with_items:
+         - "chkconfig --add /etc/init.d/postgresql-db2"
+         - "chkconfig /etc/init.d/postgresql-db2 on"
