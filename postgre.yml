@@ -22,6 +22,8 @@
       - cronie-anacron
       - cronie
       - crontabs   
+    notify:
+      - enable postgres
                                   
   - name: PostgreSQL service stop    
     service:
@@ -96,30 +98,45 @@
   - name: Add entry pg_hba.conf user1
     lineinfile:
        dest=/usr/pgsql-9.6/share/pg_hba.conf
-       regexp='local dbgr1 {{db_user1}} 127.0.0.1/32 md5'
-       line='local dbgr1 {{db_user1}} 127.0.0.1/32 md5' state=present
+       regexp='local dbgr1 {{db_user1}} md5'
+       line='local dbgr1 {{db_user1}} md5' state=present
    
   - name: Add entry pg_hba.conf user2
     lineinfile:
        dest=/usr/pgsql-9.6/share/pg_hba.conf
        regexp='local dbgr2 {{db_user2}} md5'
-       line='local dbgr2 {{db_user2}} ' state=present
+       line='local dbgr2 {{db_user2}} md5' state=present
     notify:
       - reload postgres
  
+  - name: add entry to postgresql
+    lineinfile:
+       dest=/usr/pgsql-9.6/share/postgresql.conf
+       regexp='^listen_addresses'
+       line="listen_addresses = '51.75.30.78'"
+       regexp='^port'
+       line="port = 6666"
+       state=present
+    notify:
+      - restart postgres
+
 #  - name: PostgreSQL service restart after change pg_hda.conf   
 #    service:
 #       name: 'postgresql-9.6'
 #       state: restart
 
-# описание хэндлеров
   handlers:
-    # перечитываем конфигурацию postgresql
+#    # перечитываем конфигурацию postgresql
   - name: reload postgres
     sudo: yes
-    action: service name=postgresql state=reloaded
+    action: service name=postgresql-9.6 state=reloaded
 
     # перезагружаем postgresql
-#  - name: Restart postgres
-#    sudo: yes
-#    action: service name=postgresql state=restarted
+  - name: restart postgres
+    sudo: yes
+    action: service name=postgresql-9.6 state=restarted
+
+    # enable postgresql
+  - name: enable postgres
+    sudo: yes
+    action: service name=postgresql-9.6 state=enable
