@@ -6,11 +6,11 @@
   # Импортируем константы
   - name: Import vars
     include_vars: vars/vaulted_vars.yml
-	
+
   # Устанавливаем необходимый репозиторий для установки
   - name: Install PostgreSQL repo
     yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present 
-	
+
   # Установка PostgreSQL и включение в автозагрузку  
   - name: Install PostgreSQL
     yum: name="{{ item }}" state=latest
@@ -38,13 +38,6 @@
   # Инициализируем наш PostgreSQL	
   - name: Create data cluster
     command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
-
-#  - name: Enable PostgreSQL
-#    service: 
-#       name: 'postgresql-9.6'
-#       enabled: yes
-#       state: started
-#       daemon_reload: yes
 
   # Запускаем службы PostgreSQL	  
   - name: PostgreSQL service start    
@@ -116,22 +109,30 @@
     notify:
       - reload postgres
  
-  - name: add entry to postgresql
+  - name: add entry ip for postgresql
     lineinfile:
-#       dest=/usr/pgsql-9.6/share/postgresql.conf
+#      dest=/usr/pgsql-9.6/share/postgresql.conf
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^listen_addresses'
-       line="listen_addresses = '51.75.30.78'"
+       line="listen_addresses = 51.75.30.78"
+       state=present
+   
+  - name: add entry port for postgresql
+    lineinfile:
+#      dest=/usr/pgsql-9.6/share/postgresql.conf
+       dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^port'
-       line="port = 6666"
+       line="port = {{portdb1}}"
        state=present
     notify:
       - restart postgres
-
-#  - name: PostgreSQL service restart after change pg_hda.conf   
-#    service:
-#       name: 'postgresql-9.6'
-#       state: restart
+  
+  - name: add iptables rule for connecting 
+    command: "{{ item }}"
+    with_items:
+      - "iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 202.54.1.20 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT"
+      - "service iptables save"
+      - "systemctl restart iptables"
 
   handlers:
 #    # перечитываем конфигурацию postgresql
