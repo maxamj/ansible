@@ -136,9 +136,6 @@
 
   - name: PostgreSQL service restart    
     command: systemctl restart postgresql-9.6
-  
-  - name: PostgreSQL service restart    
-    command: systemctl status postgresql-9.6
 
 #  handlers:
 #    # перечитываем конфигурацию postgresql
