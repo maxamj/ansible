@@ -26,24 +26,28 @@
       - cronie-anacron
       - cronie
       - crontabs   
-    notify:
-      - enable postgres
-                                 
+                                
   # Остановка службы PostgreSQL								 
   - name: PostgreSQL service stop    
     service:
        name: 'postgresql-9.6'
        state: stopped
       
+  # Delete data PostgreSQL	
+  - name: Enable cluster
+    command: rm -rf /var/lib/pgsql/9.6/data
+
   # Инициализируем наш PostgreSQL	
   - name: Create data cluster
     command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
 
+  # Enable PostgreSQL	
+  - name: Enable cluster
+    command: systemctl enable postgresql-9.6
+  
   # Запускаем службы PostgreSQL	  
   - name: PostgreSQL service start    
-    service:
-       name: 'postgresql-9.6'
-       state: started
+    command: systemctl start postgresql-9.6
 
   - name: Create the user1
     become: yes
@@ -97,55 +101,56 @@
 
   - name: Add entry pg_hba.conf user1
     lineinfile:
-       dest=/usr/pgsql-9.6/share/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
        regexp='local dbgr1 {{db_user1}} md5'
        line='local dbgr1 {{db_user1}} md5' state=present
    
   - name: Add entry pg_hba.conf user2
     lineinfile:
-       dest=/usr/pgsql-9.6/share/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
        regexp='local dbgr2 {{db_user2}} md5'
        line='local dbgr2 {{db_user2}} md5' state=present
-    notify:
-      - reload postgres
+#    notify:
+#      - reload postgres
  
   - name: add entry ip for postgresql
     lineinfile:
-#      dest=/usr/pgsql-9.6/share/postgresql.conf
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^listen_addresses'
-       line="listen_addresses = 51.75.30.78"
+       line="listen_addresses = {{ippostgres}}"
        state=present
    
   - name: add entry port for postgresql
     lineinfile:
-#      dest=/usr/pgsql-9.6/share/postgresql.conf
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^port'
        line="port = {{portdb1}}"
        state=present
-    notify:
-      - restart postgres
-  
+   
   - name: add iptables rule for connecting 
     command: "{{ item }}"
     with_items:
-      - "iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 202.54.1.20 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT"
+      - "iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT"
       - "service iptables save"
       - "systemctl restart iptables"
 
-  handlers:
+  - name: PostgreSQL service restart    
+    command: systemctl restart postgresql-9.6
+  
+  - name: PostgreSQL service restart    
+    command: systemctl status postgresql-9.6
+
+#  handlers:
 #    # перечитываем конфигурацию postgresql
-  - name: reload postgres
-    sudo: yes
-    action: service name=postgresql-9.6 state=reloaded
+#  - name: reload postgres
+#    sudo: yes
+#    action: service name=postgresql-9.6 state=reloaded
 
     # перезагружаем postgresql
-  - name: restart postgres
-    sudo: yes
-    action: service name=postgresql-9.6 state=restarted
-
+#  - name: restart postgres
+#    command: systemctl restart postgresql-9.6
+ 
     # enable postgresql
-  - name: enable postgres
-    sudo: yes
-    action: service name=postgresql-9.6 state=enable
+#  - name: enable postgres
+#    sudo: yes
+#    action: service name=postgresql-9.6 state=enable
