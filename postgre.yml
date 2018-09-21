@@ -101,6 +101,14 @@
 #       type: table
 #       state: present
 
+  # Добавляем маппинг юзеру 1
+  - name: Add mapping user1
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+       regexp='map1 postgres {{db_user1}}'
+       line="map1 postgres {{db_user1}}"
+       state=present
+
   # Добавляем тип авторизации юзера 1 PostgreSQL	
   - name: Add entry pg_hba.conf user1
     lineinfile:
