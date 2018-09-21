@@ -13,9 +13,7 @@
 
   # Установка PostgreSQL и включение в автозагрузку  
   - name: Install PostgreSQL
-    yum: name="{{ item }}" state=latest
-    update_cache: yes
-    enablerepo: "pgdg96"
+    yum: name="{{ item }}" state=latest update_cache=yes enablerepo=pgdg96
     with_items:
       - "postgresql96"
       - "postgresql96-server"
@@ -34,8 +32,8 @@
        state: stopped
       
   # Delete data PostgreSQL	
-  - name: Enable cluster
-    command: rm -rf /var/lib/pgsql/9.6/data
+  - name: Delete data PostgreSQL
+    file: path='/var/lib/pgsql/9.6/data' state=absent
 
   # Инициализируем наш PostgreSQL	
   - name: Create data cluster
@@ -49,6 +47,7 @@
   - name: PostgreSQL service start    
     command: systemctl start postgresql-9.6
 
+  # Создаем юзера 1 PostgreSQL	  
   - name: Create the user1
     become: yes
     become_user: postgres
@@ -57,7 +56,8 @@
        password: "{{db_pass_user1}}"
        encrypted: True
 
-  - name: create the db1
+  # Создаем БД 1 PostgreSQL	
+  - name: Сreate the db1
     become: yes
     become_user: postgres
     postgresql_db:
@@ -68,6 +68,7 @@
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
 
+  # Создаем юзера 2 PostgreSQL	
   - name: Create the user2
     become: yes
     become_user: postgres
@@ -75,8 +76,9 @@
        name: "{{db_user2}}"
        password: "{{db_pass_user2}}"
        encrypted: True
-       
-  - name: create the db2
+
+  # Создаем БД 2 PostgreSQL	       
+  - name: Сreate the db2
     become: yes
     become_user: postgres
     postgresql_db:
@@ -99,12 +101,14 @@
 #       type: table
 #       state: present
 
+  # Добавляем тип авторизации юзера 1 PostgreSQL	
   - name: Add entry pg_hba.conf user1
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
        regexp='local dbgr1 {{db_user1}} md5'
        line='local dbgr1 {{db_user1}} md5' state=present
-   
+
+  # Добавляем тип авторизации юзера 2 PostgreSQL	   
   - name: Add entry pg_hba.conf user2
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
@@ -112,30 +116,37 @@
        line='local dbgr2 {{db_user2}} md5' state=present
 #    notify:
 #      - reload postgres
- 
-  - name: add entry ip for postgresql
+
+  # Меняем ИП адрес в конфиг
+  - name: Add entry ip for postgresql
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^listen_addresses'
        line="listen_addresses = {{ippostgres}}"
        state=present
-   
-  - name: add entry port for postgresql
+
+  # Меняем порт БД 	   
+  - name: Add entry port for postgresql
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^port'
        line="port = {{portdb1}}"
        state=present
-   
-  - name: add iptables rule for connecting 
+
+  # Добавляем записи в iptables для внешних подключений	   
+  - name: Add iptables rule for connecting 
     command: "{{ item }}"
     with_items:
-      - "iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT"
-      - "service iptables save"
-      - "systemctl restart iptables"
+      - iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT
 
-  - name: PostgreSQL service restart    
-    command: systemctl restart postgresql-9.6
+  # Сохраняем iptables	  
+  - name: Save iptables
+    command: iptables-save
+    become: true
+
+  # Перезапускаем службу iptables
+  - name: Restart service iptables 
+    command: systemctl restart iptables
 
 #  handlers:
 #    # перечитываем конфигурацию postgresql
