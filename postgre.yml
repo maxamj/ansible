@@ -47,12 +47,63 @@
   - name: PostgreSQL service start    
     command: systemctl start postgresql-9.6
 
+  # Генерируем пароль для юзера1 
+  - name: password gen
+    command: pwgen -1
+    register: user_pass1
+
+  # Хешируем пароль для юзера1 
+  - name: password hash
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass1.stdout}}","$1$saltsalt$"))'
+    register: user_passhash1
+
+  # Создаем юзера1 
+  - name: newuser
+    user:
+      name: "{{ user1 }}"
+      password: "{{user_passhash1.stdout}}"
+      shell: /bin/bash
+      createhome: yes
+
+  # Пишем пароль юзера1 в файл варс 	   
+  - name: Write pass user1 into vars
+    lineinfile:
+       dest=/etc/ansible/vars/vaulted_vars.yml
+       regexp='^user1_pass:\s {{user_pass1.stdout}}'
+       line="user1_pass{{ ":" }} {{user_pass1.stdout}}"
+       state=present
+
+  # Генерируем пароль для юзера2 
+  - name: password gen
+    command: pwgen -1
+    register: user_pass2
+
+  # Хешируем пароль для юзера2 
+  - name: password hash
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass2.stdout}}","$1$saltsalt$"))'
+    register: user_passhash2
+
+  # Создаем юзера2 
+  - name: newuser
+    user:
+      name: "{{ user2 }}"
+      password: "{{user_passhash2.stdout}}"
+      shell: /bin/bash
+      createhome: yes
+
+  # Пишем пароль юзера2 в файл варс 	   
+  - name: Write pass user2 into vars
+    lineinfile:
+       dest=/etc/ansible/vars/vaulted_vars.yml
+       regexp='^user2_pass:\s {{user_pass2.stdout}}'
+       line="user2_pass{{ ":" }} {{user_pass2.stdout}}"
+       
   # Создаем юзера 1 PostgreSQL	  
   - name: Create the user1
     become: yes
     become_user: postgres
     postgresql_user:
-       name: "{{db_user1}}"
+       name: "{{user1}}"
        password: "{{db_pass_user1}}"
        encrypted: True
     no_log: True
@@ -63,7 +114,7 @@
     become_user: postgres
     postgresql_db:
        name: dbgr1
-       owner: "{{db_user1}}"
+       owner: "{{user1}}"
        template: template0
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
@@ -75,7 +126,7 @@
     become: yes
     become_user: postgres
     postgresql_user:
-       name: "{{db_user2}}"
+       name: "{{user2}}"
        password: "{{db_pass_user2}}"
        encrypted: True
        role_attr_flags: LOGIN
@@ -87,24 +138,12 @@
     become_user: postgres
     postgresql_db:
        name: dbgr2
-       owner: "{{db_user2}}"
+       owner: "{{user2}}"
        template: template1
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
     no_log: True
-
-#  - name: create the db2
-#    become: yes
-#    become_user: postgres
-#    postgresql_privs:
-#       db: dbgr2
-#       grant_option: yes
-#       roles: "{{db_user2}}"
-#       objs: ALL_IN_SCHEMA
-#       privs: ALL
-#       type: table
-#       state: present
 
   # Добавляем маппинг юзеру 1
   - name: Add mapping user1
@@ -160,32 +199,6 @@
   # Перезапускаем службу iptables
   - name: Restart service iptables 
     command: systemctl restart iptables
-
-  # Генерируем пароль для юзера1 
-  - name: password gen
-    command: pwgen -1
-    register: user_pass
-
-  # Хешируем пароль для юзера1 
-  - name: password hash
-    command: python -c 'import crypt; print(crypt.crypt("{{user_pass.stdout}}","$1$saltsalt$"))'
-    register: user_passhash
-
-  # Создаем юзера1 
-  - name: newuser
-    user:
-      name: "{{ user1 }}"
-      password: "{{user_passhash.stdout}}"
-      shell: /bin/bash
-      createhome: yes
-
-  # Пишем пароль юзера1 в файл варс 	   
-  - name: Write pass user1 into vars
-    lineinfile:
-       dest=/etc/ansible/vars/vaulted_vars.yml
-       regexp='^user1_pass:\s {{user_pass.stdout}}'
-       line="user1_pass{{ ":" }} {{user_pass.stdout}}"
-       state=present
 
 #  handlers:
 #    # перечитываем конфигурацию postgresql
