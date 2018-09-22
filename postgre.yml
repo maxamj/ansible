@@ -106,7 +106,7 @@
        name: "{{user1}}"
        password: "{{db_pass_user1}}"
        encrypted: True
-       priv: 'dbgr1.*:ALL/dbgr2.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES'
+       priv: '{{db_name1}}.*:ALL/{{db_name2}}.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES'
 #    no_log: True
 
   # Создаем БД 1 PostgreSQL	
@@ -114,7 +114,7 @@
     become: yes
     become_user: postgres
     postgresql_db:
-       name: dbgr1
+       name: "{{db_name1}}"
        owner: "{{user1}}"
        template: template0
        encoding: UTF8
@@ -131,7 +131,7 @@
        password: "{{db_pass_user2}}"
        encrypted: True
        role_attr_flags: LOGIN
-       priv: dbgr2.*:ALL/dbgr1.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES
+       priv: '{{db_name2}}.*:ALL/{{db_name1}}.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES'
 #    no_log: True
 
   # Создаем БД 2 PostgreSQL	       
@@ -139,7 +139,7 @@
     become: yes
     become_user: postgres
     postgresql_db:
-       name: dbgr2
+       name: "{{db_name2}}"
        owner: "{{user2}}"
        template: template1
        encoding: UTF8
