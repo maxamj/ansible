@@ -36,9 +36,7 @@
     file: path="{{item}}" state=absent
     with_items:
       - /var/lib/pgsql/9.6/1
-      - /var/lib/pgsql/9.6/1/data
       - /var/lib/pgsql/9.6/2
-      - /var/lib/pgsql/9.6/2/data
 
   # Инициализируем наш PostgreSQL	
   - name: Create dir
