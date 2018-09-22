@@ -1,8 +1,8 @@
 ---
 - hosts: postgre
-  
+
   tasks:
-  
+
   # Импортируем константы
   - name: Import vars
     include_vars: vars/vaulted_vars.yml
@@ -78,6 +78,7 @@
        name: "{{db_user2}}"
        password: "{{db_pass_user2}}"
        encrypted: True
+       role_attr_flags: LOGIN
     no_log: True
 
   # Создаем БД 2 PostgreSQL	       
@@ -160,12 +161,32 @@
   - name: Restart service iptables 
     command: systemctl restart iptables
 
+  # Генерируем пароль для юзера1 
+  - name: password gen
+    command: pwgen -1
+    register: user_pass
+
+  # Хешируем пароль для юзера1 
   - name: password hash
-    command: python -c 'import crypt; print(crypt.crypt("{{user_pass1}}","$6$qwerty$"))'
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass.stdout_lines}}","$6$saltsalt$"))'
     register: user_passhash
 
+  # Создаем юзера1 
   - name: newuser
-    action: user name={{ db_user1 }} password={{ user_pass1 }} update_password=on_create shell=/bin/bash system=yes state=present
+    user:
+      name: "{{ user1 }}"
+      password: "{{user_passhash.stdout_lines}}"
+      shell: /bin/bash
+      createhome: yes
+
+  # Пишем пароль юзера1 в файл варс 	   
+  - name: Write pass user1 into vars
+    lineinfile:
+       dest=/etc/ansible/vars/vaulted_vars.yml
+       regexp='^user1_pass:\s {{user_pass.stdout}}'
+       line="user1_pass{{ ":" }} {{user_pass.stdout}}"
+       state=present
+
 #  handlers:
 #    # перечитываем конфигурацию postgresql
 #  - name: reload postgres
