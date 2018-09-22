@@ -168,34 +168,34 @@
        grant_option: no
 
   # Добавляем маппинг юзеру 1
-  - name: Add mapping user1
-    lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
-       regexp='^map1 postgres'
-       line="map1 postgres {{db_user1}}"
-       state=present
+#  - name: Add mapping user1
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map1 postgres'
+#       line="map1 postgres {{db_user1}}"
+#       state=present
 
   # Добавляем маппинг юзеру 2
-  - name: Add mapping user2
-    lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
-       regexp='^map2 postgres'
-       line="map2 postgres {{db_user2}}"
-       state=present
+#  - name: Add mapping user2
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map2 postgres'
+#       line="map2 postgres {{db_user2}}"
+#       state=present
 
   # Добавляем тип авторизации юзера 1 PostgreSQL	
   - name: Add entry pg_hba.conf user1
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
        regexp='^local {{db_name1}}'
-       line='local {{db_name1}} {{db_user1}} md5' state=present
+       line='local all {{db_user1}} md5' state=present
 
   # Добавляем тип авторизации юзера 2 PostgreSQL	   
   - name: Add entry pg_hba.conf user2
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
        regexp='^local {{db_name2}}'
-       line='local {{db_name2}} {{db_user2}} md5' state=present
+       line='local all {{db_user2}} md5' state=present
 #    notify:
 #      - reload postgres
 
@@ -212,7 +212,7 @@
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/postgresql.conf
        regexp='^port'
-       line="port = {{portdb1}}"
+       line="port = {{port1}}"
        state=present
 
   # Добавляем записи в iptables для внешних подключений	   
