@@ -69,7 +69,7 @@
   - name: Write pass user1 into vars
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
-       regexp='^user1_pass:\s {{user_pass1.stdout}}'
+       regexp='^user1_pass'
        line="user1_pass{{ ":" }} {{user_pass1.stdout}}"
        state=present
 
@@ -95,7 +95,7 @@
   - name: Write pass user2 into vars
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
-       regexp='^user2_pass:\s {{user_pass2.stdout}}'
+       regexp='^user2_pass'
        line="user2_pass{{ ":" }} {{user_pass2.stdout}}"
 
   # Создаем юзера 1 PostgreSQL	  
@@ -106,8 +106,8 @@
        name: "{{user1}}"
        password: "{{db_pass_user1}}"
        encrypted: True
-       priv: '{{db_name1}}.*:ALL/{{db_name2}}.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES'
-#    no_log: True
+#       priv: '{{db_name1}}.*:ALL'
+#   no_log: True
 
   # Создаем БД 1 PostgreSQL	
   - name: Сreate the db1
@@ -122,6 +122,16 @@
        lc_ctype: 'en_US.UTF-8'
     no_log: True
 
+  - name: Create postgresql_privs for user1
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+       db: "{{db_name1}}"
+       privs: ALL
+       type: database
+       role: "{{db_user1}}"
+       grant_option: no
+
   # Создаем юзера 2 PostgreSQL	
   - name: Create the user2
     become: yes
@@ -131,8 +141,8 @@
        password: "{{db_pass_user2}}"
        encrypted: True
        role_attr_flags: LOGIN
-       priv: '{{db_name2}}.*:ALL/{{db_name1}}.*:SELECT/*.*:SUPER,RELOAD,SHOW DATABASES'
-#    no_log: True
+#       priv: '{{db_name2}}.*:ALL'
+#   no_log: True
 
   # Создаем БД 2 PostgreSQL	       
   - name: Сreate the db2
@@ -147,11 +157,21 @@
        lc_ctype: 'en_US.UTF-8'
     no_log: True
 
+  - name: Create postgresql_privs for user2
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+       db: "{{db_name2}}"
+       privs: ALL
+       type: database
+       role: "{{db_user2}}"
+       grant_option: no
+
   # Добавляем маппинг юзеру 1
   - name: Add mapping user1
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_ident.conf
-       regexp='map1 postgres {{db_user1}}'
+       regexp='^map1 postgres'
        line="map1 postgres {{db_user1}}"
        state=present
 
@@ -159,7 +179,7 @@
   - name: Add mapping user2
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_ident.conf
-       regexp='map2 postgres {{db_user2}}'
+       regexp='^map2 postgres'
        line="map2 postgres {{db_user2}}"
        state=present
 
@@ -167,15 +187,15 @@
   - name: Add entry pg_hba.conf user1
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
-       regexp='local dbgr1 {{db_user1}} md5'
-       line='local dbgr1 {{db_user1}} md5' state=present
+       regexp='^local {{db_name1}}'
+       line='local {{db_name1}} {{db_user1}} md5' state=present
 
   # Добавляем тип авторизации юзера 2 PostgreSQL	   
   - name: Add entry pg_hba.conf user2
     lineinfile:
        dest=/var/lib/pgsql/9.6/data/pg_hba.conf
-       regexp='local dbgr2 {{db_user2}} md5'
-       line='local dbgr2 {{db_user2}} md5' state=present
+       regexp='^local {{db_name2}}'
+       line='local {{db_name2}} {{db_user2}} md5' state=present
 #    notify:
 #      - reload postgres
 
