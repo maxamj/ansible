@@ -168,14 +168,14 @@
 
   # Хешируем пароль для юзера1 
   - name: password hash
-    command: python -c 'import crypt; print(crypt.crypt("{{user_pass.stdout_lines}}","$6$saltsalt$"))'
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass.stdout}}","$1$saltsalt$"))'
     register: user_passhash
 
   # Создаем юзера1 
   - name: newuser
     user:
       name: "{{ user1 }}"
-      password: "{{user_passhash.stdout_lines}}"
+      password: "{{user_passhash.stdout}}"
       shell: /bin/bash
       createhome: yes
 
