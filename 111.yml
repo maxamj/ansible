@@ -40,23 +40,30 @@
 
   # Инициализируем наш PostgreSQL	
   - name: Create dir
-    command: "{{item}}"
+    file: path={{item}} state=directory recurse=yes owner=postgres group=postgres
     with_items:
-      - "mkdir /var/lib/pgsql/9.6/1"
-      - "mkdir /var/lib/pgsql/9.6/1/data"
-      - "mkdir /var/lib/pgsql/9.6/2"
-      - "mkdir /var/lib/pgsql/9.6/2/data"
+      - /var/lib/pgsql/9.6/1
+      - /var/lib/pgsql/9.6/1/data
+      - /var/lib/pgsql/9.6/2
+      - /var/lib/pgsql/9.6/2/data
+    
 
   # Инициализируем наш PostgreSQL	
   - name: Init data cluster 1
+    become: yes 
+    become_user: postgres
+    become_method: sudo
     command:  "{{item}}"
     with_items:
-      - "initdb -D /var/lib/pgsql/9.6/1/data"
-      - "initdb -D /var/lib/pgsql/9.6/2/data"
+      - "/usr/pgsql-9.6/bin/initdb -D /var/lib/pgsql/9.6/1/data"
+      - "/usr/pgsql-9.6/bin/initdb -D /var/lib/pgsql/9.6/2/data"
 
   # Инициализируем наш PostgreSQL	
   - name: Start data cluster 1
+    become: yes 
+    become_user: postgres
+    become_method: sudo
     command: "{{item}}"
     with_items:
-      - 'pg_ctl -D /var/lib/pgsql/9.6/1/data -o "-p 6666" -l /var/lib/pgsql/9.6/1/logdb1 start'
-      - 'pg_ctl -D /var/lib/pgsql/9.6/2/data -o "-p 7777" -l /var/lib/pgsql/9.6/2/logdb2 start'
+      - '/usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/1/data -o "-p 6666" start'
+      - '/usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/2/data -o "-p 7777" start'
