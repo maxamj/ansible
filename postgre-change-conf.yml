@@ -17,28 +17,28 @@
   # Добавляем тип авторизации юзера 1 PostgreSQL	
   - name: Add entry pg_hba.conf user1
     lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/1/data/pg_hba.conf
        regexp='^local {{db_name1}}'
        line='local all {{db_user1}} md5' state=present
 
   # Добавляем тип авторизации юзера 2 PostgreSQL	   
   - name: Add entry pg_hba.conf user2
     lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/1/data/pg_hba.conf
        regexp='^local {{db_name2}}'
        line='local all {{db_user2}} md5' state=present
 
   # Добавляем тип авторизации юзера 3 PostgreSQL	
   - name: Add entry pg_hba.conf user3
     lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/2/data/pg_hba.conf
        regexp='^local {{db_name3}}'
        line='local all {{db_user3}} md5' state=present
 
   # Добавляем тип авторизации юзера 4 PostgreSQL	   
   - name: Add entry pg_hba.conf user4
     lineinfile:
-       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       dest=/var/lib/pgsql/9.6/2/data/pg_hba.conf
        regexp='^local {{db_name4}}'
        line='local all {{db_user4}} md5' state=present
 
