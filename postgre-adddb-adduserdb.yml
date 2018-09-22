@@ -6,6 +6,7 @@
        name: "{{user1}}"
        password: "{{db_pass_user1}}"
        encrypted: True
+       port: "{{port1}}"
 #       priv: '{{db_name1}}.*:ALL'
 #   no_log: True
 
@@ -20,6 +21,7 @@
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
+       port: "{{port1}}"
     no_log: True
 
   - name: Create postgresql_privs for user1
@@ -31,6 +33,7 @@
        type: database
        role: "{{db_user1}}"
        grant_option: no
+       port: "{{port1}}"
 
   # Создаем юзера 2 PostgreSQL	
   - name: Create the user2
@@ -41,6 +44,7 @@
        password: "{{db_pass_user2}}"
        encrypted: True
        role_attr_flags: LOGIN
+       port: "{{port1}}"
 #       priv: '{{db_name2}}.*:ALL'
 #   no_log: True
 
@@ -55,6 +59,7 @@
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
+       port: "{{port1}}"
     no_log: True
 
   - name: Create postgresql_privs for user2
@@ -66,6 +71,7 @@
        type: database
        role: "{{db_user2}}"
        grant_option: no
+       port: "{{port1}}"
 
   # Создаем юзера 3 PostgreSQL	  
   - name: Create the user3
@@ -75,6 +81,7 @@
        name: "{{user3}}"
        password: "{{db_pass_user3}}"
        encrypted: True
+       port: "{{port2}}"
 
   # Создаем БД 3 PostgreSQL	
   - name: Сreate the db3
@@ -87,6 +94,7 @@
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
+       port: "{{port2}}"
     no_log: True
 
   - name: Create postgresql_privs for user3
@@ -98,6 +106,7 @@
        type: database
        role: "{{db_user3}}"
        grant_option: no
+       port: "{{port2}}"
 
   # Создаем юзера 4 PostgreSQL	
   - name: Create the user4
@@ -108,6 +117,7 @@
        password: "{{db_pass_user4}}"
        encrypted: True
        role_attr_flags: LOGIN
+       port: "{{port2}}"
 
   # Создаем БД 4 PostgreSQL	       
   - name: Сreate the db4
@@ -120,6 +130,7 @@
        encoding: UTF8
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
+       port: "{{port2}}"
     no_log: True
 
   - name: Create postgresql_privs for user4
@@ -131,3 +142,4 @@
        type: database
        role: "{{db_user4}}"
        grant_option: no
+       port: "{{port2}}"

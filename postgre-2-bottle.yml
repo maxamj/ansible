@@ -16,8 +16,8 @@
     command: systemctl enable postgresql-9.6
   
   # Запускаем службы PostgreSQL	  
-  - name: PostgreSQL service start    
-    command: systemctl start postgresql-9.6
+#  - name: PostgreSQL service start    
+#    command: systemctl start postgresql-9.6
 
   # Импортируем добавление пользователей в систему
   - name: Import add users in system

@@ -1,15 +1,15 @@
   # Генерируем пароль для юзера1 
-  - name: password gen
+  - name: password gen 1
     command: pwgen -1
     register: user_pass1
 
   # Хешируем пароль для юзера1 
-  - name: password hash
+  - name: password hash 1
     command: python -c 'import crypt; print(crypt.crypt("{{user_pass1.stdout}}","$1$saltsalt$"))'
     register: user_passhash1
 
   # Создаем юзера1 
-  - name: newuser
+  - name: newuser 1
     user:
       name: "{{ user1 }}"
       password: "{{user_passhash1.stdout}}"
@@ -17,7 +17,7 @@
       createhome: yes
 
   # Пишем пароль юзера1 в файл варс 	   
-  - name: Write pass user1 into vars
+  - name: Write pass user1 into vars 1
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
        regexp='^user1_pass'
@@ -25,17 +25,17 @@
        state=present
 
   # Генерируем пароль для юзера2 
-  - name: password gen
+  - name: password gen 2
     command: pwgen -1
     register: user_pass2
 
   # Хешируем пароль для юзера2 
-  - name: password hash
+  - name: password hash 2
     command: python -c 'import crypt; print(crypt.crypt("{{user_pass2.stdout}}","$1$saltsalt$"))'
     register: user_passhash2
 
   # Создаем юзера2 
-  - name: newuser
+  - name: newuser 2
     user:
       name: "{{ user2 }}"
       password: "{{user_passhash2.stdout}}"
@@ -43,24 +43,24 @@
       createhome: yes
 
   # Пишем пароль юзера2 в файл варс 	   
-  - name: Write pass user2 into vars
+  - name: Write pass user2 into vars 2
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
        regexp='^user2_pass'
        line="user2_pass{{ ":" }} {{user_pass2.stdout}}"
 
   # Генерируем пароль для юзера3 
-  - name: password gen
+  - name: password gen 3
     command: pwgen -1
     register: user_pass3
 
   # Хешируем пароль для юзера3 
-  - name: password hash
+  - name: password hash 3
     command: python -c 'import crypt; print(crypt.crypt("{{user_pass3.stdout}}","$1$saltsalt$"))'
-    register: user_passhash1
+    register: user_passhash3
 
   # Создаем юзера3 
-  - name: newuser
+  - name: newuser 3
     user:
       name: "{{ user3 }}"
       password: "{{user_passhash3.stdout}}"
@@ -68,7 +68,7 @@
       createhome: yes
 
   # Пишем пароль юзера3 в файл варс 	   
-  - name: Write pass user3 into vars
+  - name: Write pass user3 into vars 3
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
        regexp='^user3_pass'
@@ -76,17 +76,17 @@
        state=present
 
   # Генерируем пароль для юзера4 
-  - name: password gen
+  - name: password gen 4
     command: pwgen -1
     register: user_pass4
 
   # Хешируем пароль для юзера4 
-  - name: password hash
+  - name: password hash 4
     command: python -c 'import crypt; print(crypt.crypt("{{user_pass4.stdout}}","$1$saltsalt$"))'
     register: user_passhash4
 
   # Создаем юзера4 
-  - name: newuser
+  - name: newuser 4
     user:
       name: "{{ user4 }}"
       password: "{{user_passhash4.stdout}}"
@@ -94,7 +94,7 @@
       createhome: yes
 
   # Пишем пароль юзера4 в файл варс 	   
-  - name: Write pass user4 into vars
+  - name: Write pass user4 into vars 4
     lineinfile:
        dest=/etc/ansible/vars/vaulted_vars.yml
        regexp='^user4_pass'
