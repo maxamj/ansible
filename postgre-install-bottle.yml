@@ -1,0 +1,60 @@
+  # Устанавливаем необходимый репозиторий для установки
+  - name: Install PostgreSQL repo
+    yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present 
+
+  # Установка PostgreSQL и включение в автозагрузку  
+  - name: Install PostgreSQL
+    yum: name="{{ item }}" state=latest update_cache=yes enablerepo=pgdg96
+    with_items:
+      - "postgresql96"
+      - "postgresql96-server"
+      - "postgresql96-contrib"
+      - "postgresql96-libs"
+      - "postgresql96-devel"
+      - python-psycopg2
+      - cronie-anacron
+      - cronie
+      - crontabs   
+                                
+  # Остановка службы PostgreSQL								 
+  - name: PostgreSQL service stop    
+    service:
+       name: 'postgresql-9.6'
+       state: stopped
+      
+  # Delete data PostgreSQL	
+  - name: Delete data PostgreSQL
+    file: path="{{item}}" state=absent
+    with_items:
+      - /var/lib/pgsql/9.6/1
+      - /var/lib/pgsql/9.6/2
+
+  # Инициализируем наш PostgreSQL	
+  - name: Create dir
+    file: path={{item}} state=directory recurse=yes owner=postgres group=postgres
+    with_items:
+      - /var/lib/pgsql/9.6/1
+      - /var/lib/pgsql/9.6/1/data
+      - /var/lib/pgsql/9.6/2
+      - /var/lib/pgsql/9.6/2/data
+    
+
+  # Инициализируем наш PostgreSQL	
+  - name: Init data cluster 1
+    become: yes 
+    become_user: postgres
+    become_method: sudo
+    command:  "{{item}}"
+    with_items:
+      - "/usr/pgsql-9.6/bin/initdb -D /var/lib/pgsql/9.6/1/data"
+      - "/usr/pgsql-9.6/bin/initdb -D /var/lib/pgsql/9.6/2/data"
+
+  # Инициализируем наш PostgreSQL	
+  - name: Start data cluster 1
+    become: yes 
+    become_user: postgres
+    become_method: sudo
+    command: "{{item}}"
+    with_items:
+      - '/usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/1/data -o "-p 6666" start'
+      - '/usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/2/data -o "-p 7777" start'

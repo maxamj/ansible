@@ -1,0 +1,247 @@
+---
+- hosts: postgre
+
+  tasks:
+
+  # Импортируем константы
+  - name: Import vars
+    include_vars: vars/vaulted_vars.yml
+
+  # Устанавливаем необходимый репозиторий для установки
+  - name: Install PostgreSQL repo
+    yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm state=present 
+
+  # Установка PostgreSQL и включение в автозагрузку  
+  - name: Install PostgreSQL
+    yum: name="{{ item }}" state=latest update_cache=yes enablerepo=pgdg96
+    with_items:
+      - "postgresql96"
+      - "postgresql96-server"
+      - "postgresql96-contrib"
+      - "postgresql96-libs"
+      - "postgresql96-devel"
+      - python-psycopg2
+      - cronie-anacron
+      - cronie
+      - crontabs   
+                                
+  # Остановка службы PostgreSQL								 
+  - name: PostgreSQL service stop    
+    service:
+       name: 'postgresql-9.6'
+       state: stopped
+      
+  # Delete data PostgreSQL	
+  - name: Delete data PostgreSQL
+    file: path='/var/lib/pgsql/9.6/data' state=absent
+
+  # Инициализируем наш PostgreSQL	
+  - name: Create data cluster
+    command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
+
+  # Enable PostgreSQL	
+  - name: Enable cluster
+    command: systemctl enable postgresql-9.6
+  
+  # Запускаем службы PostgreSQL	  
+  - name: PostgreSQL service start    
+    command: systemctl start postgresql-9.6
+
+  # Генерируем пароль для юзера1 
+  - name: password gen
+    command: pwgen -1
+    register: user_pass1
+
+  # Хешируем пароль для юзера1 
+  - name: password hash
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass1.stdout}}","$1$saltsalt$"))'
+    register: user_passhash1
+
+  # Создаем юзера1 
+  - name: newuser
+    user:
+      name: "{{ user1 }}"
+      password: "{{user_passhash1.stdout}}"
+      shell: /bin/bash
+      createhome: yes
+
+  # Пишем пароль юзера1 в файл варс 	   
+  - name: Write pass user1 into vars
+    lineinfile:
+       dest=/etc/ansible/vars/vaulted_vars.yml
+       regexp='^user1_pass'
+       line="user1_pass{{ ":" }} {{user_pass1.stdout}}"
+       state=present
+
+  # Генерируем пароль для юзера2 
+  - name: password gen
+    command: pwgen -1
+    register: user_pass2
+
+  # Хешируем пароль для юзера2 
+  - name: password hash
+    command: python -c 'import crypt; print(crypt.crypt("{{user_pass2.stdout}}","$1$saltsalt$"))'
+    register: user_passhash2
+
+  # Создаем юзера2 
+  - name: newuser
+    user:
+      name: "{{ user2 }}"
+      password: "{{user_passhash2.stdout}}"
+      shell: /bin/bash
+      createhome: yes
+
+  # Пишем пароль юзера2 в файл варс 	   
+  - name: Write pass user2 into vars
+    lineinfile:
+       dest=/etc/ansible/vars/vaulted_vars.yml
+       regexp='^user2_pass'
+       line="user2_pass{{ ":" }} {{user_pass2.stdout}}"
+
+  # Создаем юзера 1 PostgreSQL	  
+  - name: Create the user1
+    become: yes
+    become_user: postgres
+    postgresql_user:
+       name: "{{user1}}"
+       password: "{{db_pass_user1}}"
+       encrypted: True
+#       priv: '{{db_name1}}.*:ALL'
+#   no_log: True
+
+  # Создаем БД 1 PostgreSQL	
+  - name: Сreate the db1
+    become: yes
+    become_user: postgres
+    postgresql_db:
+       name: "{{db_name1}}"
+       owner: "{{user1}}"
+       template: template0
+       encoding: UTF8
+       lc_collate: 'en_US.UTF-8'
+       lc_ctype: 'en_US.UTF-8'
+    no_log: True
+
+  - name: Create postgresql_privs for user1
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+       db: "{{db_name1}}"
+       privs: ALL
+       type: database
+       role: "{{db_user1}}"
+       grant_option: no
+
+  # Создаем юзера 2 PostgreSQL	
+  - name: Create the user2
+    become: yes
+    become_user: postgres
+    postgresql_user:
+       name: "{{user2}}"
+       password: "{{db_pass_user2}}"
+       encrypted: True
+       role_attr_flags: LOGIN
+#       priv: '{{db_name2}}.*:ALL'
+#   no_log: True
+
+  # Создаем БД 2 PostgreSQL	       
+  - name: Сreate the db2
+    become: yes
+    become_user: postgres
+    postgresql_db:
+       name: "{{db_name2}}"
+       owner: "{{user2}}"
+       template: template1
+       encoding: UTF8
+       lc_collate: 'en_US.UTF-8'
+       lc_ctype: 'en_US.UTF-8'
+    no_log: True
+
+  - name: Create postgresql_privs for user2
+    become: yes
+    become_user: postgres
+    postgresql_privs:
+       db: "{{db_name2}}"
+       privs: ALL
+       type: database
+       role: "{{db_user2}}"
+       grant_option: no
+
+  # Добавляем маппинг юзеру 1
+#  - name: Add mapping user1
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map1 postgres'
+#       line="map1 postgres {{db_user1}}"
+#       state=present
+
+  # Добавляем маппинг юзеру 2
+#  - name: Add mapping user2
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map2 postgres'
+#       line="map2 postgres {{db_user2}}"
+#       state=present
+
+  # Добавляем тип авторизации юзера 1 PostgreSQL	
+  - name: Add entry pg_hba.conf user1
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name1}}'
+       line='local all {{db_user1}} md5' state=present
+
+  # Добавляем тип авторизации юзера 2 PostgreSQL	   
+  - name: Add entry pg_hba.conf user2
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name2}}'
+       line='local all {{db_user2}} md5' state=present
+#    notify:
+#      - reload postgres
+
+  # Меняем ИП адрес в конфиг
+  - name: Add entry ip for postgresql
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/postgresql.conf
+       regexp='^listen_addresses'
+       line="listen_addresses = {{ippostgres}}"
+       state=present
+
+  # Меняем порт БД 	   
+  - name: Add entry port for postgresql
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/postgresql.conf
+       regexp='^port'
+       line="port = {{port1}}"
+       state=present
+
+  # Добавляем записи в iptables для внешних подключений	   
+  - name: Add iptables rule for connecting 
+    command: "{{ item }}"
+    with_items:
+      - iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 5432 -m state --state NEW,ESTABLISHED -j ACCEPT
+
+  # Сохраняем iptables	  
+  - name: Save iptables
+    command: iptables-save
+    become: true
+
+  # Перезапускаем службу iptables
+  - name: Restart service iptables 
+    command: systemctl restart iptables
+
+#  handlers:
+#    # перечитываем конфигурацию postgresql
+#  - name: reload postgres
+#    sudo: yes
+#    action: service name=postgresql-9.6 state=reloaded
+
+    # перезагружаем postgresql
+#  - name: restart postgres
+#    sudo: yes
+#    command: systemctl restart postgresql-9.6
+ 
+    # enable postgresql
+#  - name: enable postgres
+#    sudo: yes
+#    action: systemctl enable postgresql-9.6

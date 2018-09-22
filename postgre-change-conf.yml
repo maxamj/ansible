@@ -1,0 +1,91 @@
+  # Добавляем маппинг юзеру 1
+#  - name: Add mapping user1
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map1 postgres'
+#       line="map1 postgres {{db_user1}}"
+#       state=present
+
+  # Добавляем маппинг юзеру 2
+#  - name: Add mapping user2
+#    lineinfile:
+#       dest=/var/lib/pgsql/9.6/data/pg_ident.conf
+#       regexp='^map2 postgres'
+#       line="map2 postgres {{db_user2}}"
+#       state=present
+
+  # Добавляем тип авторизации юзера 1 PostgreSQL	
+  - name: Add entry pg_hba.conf user1
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name1}}'
+       line='local all {{db_user1}} md5' state=present
+
+  # Добавляем тип авторизации юзера 2 PostgreSQL	   
+  - name: Add entry pg_hba.conf user2
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name2}}'
+       line='local all {{db_user2}} md5' state=present
+
+  # Добавляем тип авторизации юзера 3 PostgreSQL	
+  - name: Add entry pg_hba.conf user3
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name3}}'
+       line='local all {{db_user3}} md5' state=present
+
+  # Добавляем тип авторизации юзера 4 PostgreSQL	   
+  - name: Add entry pg_hba.conf user4
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/data/pg_hba.conf
+       regexp='^local {{db_name4}}'
+       line='local all {{db_user4}} md5' state=present
+
+  # Меняем ИП адрес в конфиг бутылка 1
+  - name: Add entry ip for postgresql bottle 1 
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/1/data/postgresql.conf
+       regexp='^listen_addresses'
+       line="listen_addresses = {{ippostgres}}"
+       state=present
+
+  # Меняем порт БД бутылка 1 	   
+  - name: Add entry port for postgresql bottle 1
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/1/data/postgresql.conf
+       regexp='^port'
+       line="port = {{port1}}"
+       state=present
+
+  # Меняем ИП адрес в конфиг бутылка 2
+  - name: Add entry ip for postgresql bottle 2
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/2/data/postgresql.conf
+       regexp='^listen_addresses'
+       line="listen_addresses = {{ippostgres}}"
+       state=present
+
+  # Меняем порт БД бутылка 2 	   
+  - name: Add entry port for postgresql bottle 2
+    lineinfile:
+       dest=/var/lib/pgsql/9.6/2/data/postgresql.conf
+       regexp='^port'
+       line="port = {{port2}}"
+       state=present
+
+  # Добавляем записи в iptables для внешних подключений	   
+  - name: Add iptables rule for connecting 
+    command: "{{ item }}"
+    with_items:
+      - iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 6666 -m state --state NEW,ESTABLISHED -j ACCEPT
+      - iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 -d 51.75.30.78 --dport 7777 -m state --state NEW,ESTABLISHED -j ACCEPT
+
+  # Сохраняем iptables	  
+  - name: Save iptables
+    command: iptables-save
+    become: true
+
+  # Перезапускаем службу iptables
+  - name: Restart service iptables 
+    command: systemctl restart iptables
