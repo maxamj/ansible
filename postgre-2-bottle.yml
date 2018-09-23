@@ -27,6 +27,10 @@
   - name: Import add users and db
     include: postgre-change-conf.yml
 
+  # Проверка портов 6666 и 7777. Что-то висит на них?
+  - name: Check ports 6666, 7777
+    include: postgre-check-ports.yml
+
 #  handlers:
 #    # перечитываем конфигурацию postgresql
 #  - name: reload postgres

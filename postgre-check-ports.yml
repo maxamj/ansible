@@ -1,0 +1,15 @@
+  - name: Get service on port 6666
+    shell: netstat -tunlp | grep ":6666 " | sed -e 's/.*\///'
+    register: results
+
+  - name: See what netstat returned
+    debug: 
+      var: results.stdout
+
+  - name: Get service on port 7777
+    shell: netstat -tunlp | grep ":7777 " | sed -e 's/.*\///'
+    register: results
+
+  - name: See what netstat returned
+    debug: 
+      var: results.stdout
