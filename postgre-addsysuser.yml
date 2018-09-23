@@ -15,6 +15,7 @@
       password: "{{user_passhash1.stdout}}"
       shell: /bin/bash
       createhome: yes
+      state: present
 
   # Пишем пароль юзера1 в файл варс 	   
   - name: Write pass user1 into vars 1
@@ -41,6 +42,7 @@
       password: "{{user_passhash2.stdout}}"
       shell: /bin/bash
       createhome: yes
+      state: present
 
   # Пишем пароль юзера2 в файл варс 	   
   - name: Write pass user2 into vars 2
@@ -66,6 +68,7 @@
       password: "{{user_passhash3.stdout}}"
       shell: /bin/bash
       createhome: yes
+      state: present
 
   # Пишем пароль юзера3 в файл варс 	   
   - name: Write pass user3 into vars 3
