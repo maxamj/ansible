@@ -7,8 +7,7 @@
        password: "{{db_pass_user1}}"
        encrypted: True
        port: "{{port1}}"
-#       priv: '{{db_name1}}.*:ALL'
-#   no_log: True
+       state: present
 
   # Создаем БД 1 PostgreSQL	
   - name: Сreate the db1
@@ -22,6 +21,7 @@
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
        port: "{{port1}}"
+       state: present	   
     no_log: True
 
   - name: Create postgresql_privs for user1
@@ -45,8 +45,7 @@
        encrypted: True
        role_attr_flags: LOGIN
        port: "{{port1}}"
-#       priv: '{{db_name2}}.*:ALL'
-#   no_log: True
+       state: present
 
   # Создаем БД 2 PostgreSQL	       
   - name: Сreate the db2
@@ -60,6 +59,7 @@
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
        port: "{{port1}}"
+       state: present
     no_log: True
 
   - name: Create postgresql_privs for user2
@@ -82,6 +82,7 @@
        password: "{{db_pass_user3}}"
        encrypted: True
        port: "{{port2}}"
+       state: present
 
   # Создаем БД 3 PostgreSQL	
   - name: Сreate the db3
@@ -95,6 +96,7 @@
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
        port: "{{port2}}"
+       state: present
     no_log: True
 
   - name: Create postgresql_privs for user3
@@ -118,6 +120,7 @@
        encrypted: True
        role_attr_flags: LOGIN
        port: "{{port2}}"
+       state: present
 
   # Создаем БД 4 PostgreSQL	       
   - name: Сreate the db4
@@ -131,6 +134,7 @@
        lc_collate: 'en_US.UTF-8'
        lc_ctype: 'en_US.UTF-8'
        port: "{{port2}}"
+       state: present
     no_log: True
 
   - name: Create postgresql_privs for user4
