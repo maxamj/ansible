@@ -15,10 +15,6 @@
   - name: Enable cluster
     command: systemctl enable postgresql-9.6
   
-  # Запускаем службы PostgreSQL	  
-#  - name: PostgreSQL service start    
-#    command: systemctl start postgresql-9.6
-
   # Импортируем добавление пользователей в систему
   - name: Import add users in system
     include: postgre-addsysuser.yml
@@ -34,15 +30,14 @@
 #  handlers:
 #    # перечитываем конфигурацию postgresql
 #  - name: reload postgres
-#    sudo: yes
-#    action: service name=postgresql-9.6 state=reloaded
-
+#    become: yes 
+#    become_user: postgres
+#    become_method: sudo
+#    command: /usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/1/data -o "-p 6666" reload
+     
     # перезагружаем postgresql
 #  - name: restart postgres
-#    sudo: yes
-#    command: systemctl restart postgresql-9.6
- 
-    # enable postgresql
-#  - name: enable postgres
-#    sudo: yes
-#    action: systemctl enable postgresql-9.6
+#    become: yes 
+#    become_user: postgres
+#    become_method: sudo
+#    command: /usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/1/data -o "-p 6666" restart

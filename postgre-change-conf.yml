@@ -47,7 +47,7 @@
     lineinfile:
        dest=/var/lib/pgsql/9.6/1/data/postgresql.conf
        regexp='^listen_addresses'
-       line="listen_addresses = {{ippostgres}}"
+       line="listen_addresses = '{{ippostgres}}'"
        state=present
 
   # Меняем порт БД бутылка 1 	   
@@ -63,7 +63,7 @@
     lineinfile:
        dest=/var/lib/pgsql/9.6/2/data/postgresql.conf
        regexp='^listen_addresses'
-       line="listen_addresses = {{ippostgres}}"
+       line="listen_addresses = '{{ippostgres}}'"
        state=present
 
   # Меняем порт БД бутылка 2 	   
